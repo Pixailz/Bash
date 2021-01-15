@@ -1,0 +1,177 @@
+-----------------------------------------------------------------------------------------------------------------
+[CORE_UTILS]
+-----------------------------------------------------------------------------------------------------------------
+	>Set language
+		dpkg-reconfigure locales
+
+	>History of terminal 
+		//GNU History Library
+
+		history<------------------------------------//Display history of a terminal
+
+	>Which
+		//Locate a command
+
+		which<--------------------------------------//print out where the command is stored
+
+	>Ls
+		//List directory contents
+
+		ls -a<--------------------------------------//List ALL files and folders
+		ls -A<--------------------------------------//List ALL files and folders except . and ..
+		ls -l<--------------------------------------//List files and folders with details
+		ls -F<--------------------------------------//List files and folders with there types (/ for folder and @ for link) 
+		ls -R<--------------------------------------//List files and folders with there sub-folder
+		ls -t<--------------------------------------//List with date filter (newer first)
+		ls -tr<-------------------------------------//List with date filter (older first)
+		ls -h<--------------------------------------//List files and folders with the space in human readable
+
+	>Du
+		//Estimate file space usage
+
+		du<-----------------------------------------//Show size of files in current directory
+		du -h<--------------------------------------//Show size in human readable format
+		du -a<--------------------------------------//Show size of all
+		du -s<--------------------------------------//Show total size of current folder
+		du -sh *<-----------------------------------//Show total size of all directory in current directory
+
+	>Df
+		//Report file system disk space usage
+
+		df<-----------------------------------------//Report file system disk space usage
+		df -h<--------------------------------------//Human-readable format
+		df -h | grep sd<----------------------------//Report only the disk usage
+		df -ht ext4<--------------------------------//Report only the specified format
+													//In case : ext4
+	
+	>Mkdir
+		//Make directories
+	
+		mkdir -p folder/file<-----------------------//Create Folder and subfolder
+
+	>Find
+		//Search for files in a directory hierarchy
+
+		find / -name "files"<-----------------------//Find "files" in "/"
+		find / -name "files" -type d<---------------//Find directory name "files" in "/"
+		find / -name "files" -type f<---------------//Find files name "files" in "/"
+		find / -name "*.jpg" -delete<---------------//Find and delete all files with jpg extansion
+		find / -name "*.jpg" -exec chmod 600 {} \;<-//Find and execute chmod 600 to all file with jpg extension
+												//"{}" replace by the name of the file and command must end by "\;"
+
+	>Seq
+		//Print a sequence of numbers
+
+		seq 1 10<-----------------------------------//Generate number from 1 to 10
+		seq 1 2 10<---------------------------------//Generate number 1 3 5 7 9
+
+	>Grep
+		//Print lines matching a pattern
+
+		grep word /etc/passwd<----------------------//Grep "word" from /etc/passwd
+		grep -i word /etc/passwd<-------------------//Grep "word" from /etc/passwd case insensitively
+		grep -n word /etc/passwd<-------------------//Grep "word" with lines
+		grep -v word /etc/passwd<-------------------//Grep all sentence except "word"
+		grep -r word /etc/<-------------------------//Grep "word" in all the /etc folder (recursively)
+
+	>Sort
+		//Sort lines of text files
+
+		sort text.txt<------------------------------//Sort alphabetically
+		sort -o sorted_text.txt text.txt<-----------//Sort alphabetically and output it in a files
+		sort -r text.txt<---------------------------//Revert sort alphabetically
+		sort -R text.txt<---------------------------//Sort randomly
+		sort -n number.txt<-------------------------//Sort by number
+
+	>Wc
+		//Print newline, word, and byte counts for each file
+
+		wc text.txt<--------------------------------//Count lines, word and octet
+		wc -l text.txt<-----------------------------//Count only lines
+		wc -w text.txt<-----------------------------//Count only words
+		wc -c text.txt<-----------------------------//Count only octets
+		wc -m text.txt<-----------------------------//Count only character
+
+	>Uniq
+		//Report or omit repeated lines
+
+		uniq text.txt<------------------------------//Delete non uniq occurence 
+		uniq text.txt converted.txt<----------------//Delete non uniq occurence and save it
+		uniq -c text.txt<---------------------------//Count the number of occurence
+		uniq -d text.txt<---------------------------//Show only non uniq occurence
+
+	>Cut
+		//Remove sections from each line of files
+
+		cut -c 2-5 text<----------------------------//Cut from 2nd to 5th char of text
+		cut -c -3 text<-----------------------------//Cut from begin to the 3th char of text
+		cut -c 3- text<-----------------------------//Cut from 3th to the last char of text
+
+		cut -d , -f 1 text<-------------------------//Cut the first class delimited by ","
+		cut -d , -f 1,3 text<-----------------------//Cut the 1st and the 3th class delimited by ","
+		cut -d , -f 2-4 text<-----------------------//Cut from the 2nd to the 4th class delimited by ","
+		cut -d , -f -2 text<------------------------//Cut from begin to the 2nd class delimited by ","
+		cut -d , -f 2- text<------------------------//Cut from the 2nd to the last class delimited by ","
+									    		//-d , -> means delimited by 
+									    		//-f 1 -> the section to cut, in case 1
+
+	>Head
+		//Output the first part of files
+
+		head text<----------------------------------//Return the first lines
+		head -n 3 text<-----------------------------//Return the 3 first lines
+
+	>Tail
+
+	>Netstat
+		//Output the last part of files
+
+		tail text<----------------------------------//Return the last lines
+		tail -n 3 text<-----------------------------//Return the 3 last lines
+		tail -f text<-------------------------------//Return the last lines every second
+		tail -f -s 3 text<--------------------------//Return the last lines every 3 second
+			>Netstat 
+		//Print network connections, routing tables, interface
+
+		netstat -u<---------------------------------//List UDP ports
+		netstat -t<---------------------------------//List TCP ports
+		netstat -a<---------------------------------//List all ports
+		netstat -l<---------------------------------//List listenning connection
+		netstat -s<---------------------------------//Show statistic
+		netstat -p<---------------------------------//Show PID with associated connections
+		netstat -e<---------------------------------//Show all ethernet connections
+		netstat -n<---------------------------------//Show IP instead of DNS name
+		netstat -i<---------------------------------//Show connection stats by interface
+
+		EXEMPLE:
+		netstat -et<--------------------------------//List all ethernet TCP connection
+		
+	>Enumerating Distribution & Kernel Information
+		>Whoami
+			//print effective userid
+
+			whoami
+
+		>Hostname
+			//Show or set the system's host name
+
+			hostname
+
+		>Id
+			//Print real and effective user and group IDs
+
+			id
+
+		>Groups
+			//Print the groups a user is in
+
+			groups user
+
+		>Lsb_release
+			//Print distribution-specific information
+
+			lsb_release -a
+		
+		>With cat
+			//Cat the release file in the etc/ folder
+			cat /etc/*release

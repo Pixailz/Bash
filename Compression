@@ -1,0 +1,27 @@
+-----------------------------------------------------------------------------------------------------------------
+[COMPRESSION]
+-----------------------------------------------------------------------------------------------------------------
+#1st step reunite all file in a tar files
+	tar -cvf archive.tar folder/<---------------//Compress archive
+												//-c <-//Create tar file
+												//-v <-//Verbose
+												//-f <-//File name
+	tar -tf archive.tar<------------------------//See what's in a archive
+	tar -rvf archive.tar folder/<---------------//Add a file to archive
+	tar -xvf archive.tar<-----------------------//Extract archive
+
+#2nd step compress
+	->gzip
+		gzip archive.tar<-----------------------//Compress archive
+		gunzip archive.tar.gz<------------------//Decompress archive
+
+	->bzip2
+		bzip2 archive.tar<----------------------//Compress archive
+		bunzip2 archive.tar.bz2<----------------//Decompress archive
+
+#Step 1 and 2
+	tar -zcvf archive.tar folder/<--------------//Tar and compress gzip archive
+	tar -zxvf archive.tar.gz<-------------------//Decompress and untar gzip archive
+	tar -jcvf archive.tar folder/<--------------//Tar and compress bzip2 archive
+	tar -jxvf archive.tar.bz2<------------------//Decompress and untar bzip2 archive
+-----------------------------------------------------------------------------------------------------------------

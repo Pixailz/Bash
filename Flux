@@ -1,0 +1,66 @@
+-----------------------------------------------------------------------------------------------------------------
+[FLUX]
+-----------------------------------------------------------------------------------------------------------------	
+-> THE ">" AND "2>" AND "2>&1"
+		cut -d , -f 1 unexistant_files.csv > students.txt 2> error.log
+			//here we can see two redirection : - > students.txt -> content of command in students.txt
+												  this is the standard output
+												- 2> error.log -> redirect eventual erros in error.log
+												  this is the error output
+												//NOTE : we can use 2>> output format to add the error
+												//belong the file
+
+		cut -d , -f 1 unexistant_files.csv > students.txt 2>&1
+												- All the content go to students.txt, standard and
+												  error output
+
+    -> THE "<" AND "<<"
+	    cat < notes.csv
+    		//Input files to command
+    	
+    	sort -n << FIN
+    		//Keyboard input
+	    	//Inputing this :
+    		//13
+    		//132
+	    	//10
+    		//131
+    		//34
+	    	//87
+    		//66
+    		//68
+	    	//65
+    		//Will result this : 
+    		//FIN
+	    	//10
+    		//13
+    		//34
+	    	//65
+    		//66
+    		//68
+	    	//87
+    		//131
+    		//132
+	    	//NOTE : the "FIN" is not the keyword to state the end of userinput so if you say this : 
+    		//		 sort -n << End 
+    		//		 this will work too
+    -> THE "|"
+
+    	du
+    		//Show files size. 
+
+    	du | sort -nr
+    		//Sort files by numbers big to small ..
+
+    	du | sort -nr | head
+    		//Show the first lines of sorted files by numbers big to small ....
+
+    	du | sort -nr | less
+    		//Show all the sorted files by numbers big to small page by page
+
+    	sudo grep log -Ir /var/log  | cut -d : -f 1  | sort | uniq
+    		// 1 : sudo grep log -Ir /var/log -> Search for log in /var/log (-I for except binary files)
+    		// 2 : cut -d : -f 1			  -> Cut the class delimited by ":"
+    		// 3 : sort 					  -> Sort result
+    		// 4 : uniq 					  -> Delete doublon
+-----------------------------------------------------------------------------------------------------------------

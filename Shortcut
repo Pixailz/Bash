@@ -1,0 +1,19 @@
+-----------------------------------------------------------------------------------------------------------------
+[SHORTCUT]
+-----------------------------------------------------------------------------------------------------------------
+->Ctrl + Shift + Alt
+	->Ctrl
+		Ctrl + R <-//For searching old command 
+		Ctrl + L <-//Erase terminal screen
+		Ctrl + D <-//Terminate terminal if command prompt is clear
+		Ctrl + A <-//Teleport the cursor to the begining of the prompt
+		Ctrl + E <-//Teleport the cursor to the end of the prompt
+		Ctrl + U <-//Delete all caractere on the left of the cursor (if it's at the end all delete)
+		Ctrl + K <-//Delete all caractere on the right of the cursor (if it's at the begin all delete)
+		Ctrl + W <-//Delete first word on the left of the cursor
+		Ctrl + Y <-//If you have previously delete anything with Ctrl U,K or W this will paste the deleted text
+		Ctrl + Z <-//Pause execution of command (bg for resume pause)
+	->Shift
+		Shift + PgUp	<-//Scroll up pages 
+		Shift + PgDown	<-//Scroll down pages
+-----------------------------------------------------------------------------------------------------------------

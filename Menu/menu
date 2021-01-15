@@ -1,0 +1,109 @@
+#!/bin/bash
+
+##############################
+# Bash Color
+warning='\033[1;5;31m'
+blue='\e[34m'
+answer='\033[1;92m'
+info='\033[1;32m'
+download='\e[1;5;93m'
+restore='\033[0m'
+reset='\e[0m'
+##############################
+
+##############################
+# Prompt colored
+function warning() {
+  printf "${warning}[ WARNING  ]${reset} \e[1m$*${reset}\n"
+  sleep 1.5
+}
+
+function question() {
+  printf "${blue}[ QUESTION ]${reset} $*${reset}\n"
+}
+
+function answer() {
+  printf "${answer}[${reset}\e[7m$1${reset}${answer}] ${reset}$2${reset}\n"
+}
+
+function info() {
+  printf "${info}[   INFO   ]${reset} $*${reset}\n"
+}
+
+function prompt() {
+  printf "${blue}[ WAITING..]: ${reset}"
+}
+
+function download() {
+  printf "${download}[DOWNLOADNG]${reset} $* ...${reset}\n"
+}
+
+function install() {
+  printf "${download}[APTINSTALL]${reset} $*${reset}\n"
+}
+##############################
+
+function print(){
+  declare -a to_print=("$@")
+  i="1"
+  clear
+  question
+  for content in "${to_print[@]}"; do
+    answer "$i" "$content"
+    let i++
+  done
+}
+
+function choice() {
+  local nb_choice=$1
+  check="0"
+  prompt
+  read
+  REPLY=${REPLY:0:1}
+  REPLY=`echo $REPLY | tr '[A-Z]' '[a-z]'`
+  if [[ "$REPLY" == q ]]; then
+    echo "Good Bye"
+    exit 1
+  elif [[ "$REPLY" < 1 ]] || [[ "$REPLY" > "$nb_choice" ]]; then
+    echo "Wrong Choice"
+  else
+    check="1"
+    return ${REPLY}
+  fi
+}
+
+function loop() {
+  local loop="true"
+  while $loop; do
+    `echo $1`
+    last_max_printed=$?
+    choice ${last_max_printed}
+    return_code=$?
+    if [[ "$check" == "1" ]]; then
+      return ${return_code}
+    fi
+  done
+}
+
+function menu() {
+  local menu_print=(
+    "First Choice"
+    "Second Choice"
+    "One other choice"
+    "The last Choice"
+    "DESTROY THE WORLD"
+  )
+  print "${menu_print[@]}"
+  return ${#menu_print[*]}
+}
+
+loop "menu"
+choice=$?
+clear
+case $choice in
+  1) info "You choose the First choice";;
+  2) info "You choose the Second choice";;
+  3) info "You choose the Other choice";;
+  4) info "You choose the Last choice";;
+  5) warning "You choose to .. DESTROY THE WORLD"
+esac

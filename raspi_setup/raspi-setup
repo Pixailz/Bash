@@ -1,0 +1,295 @@
+#!/bin/bash
+# initial bash setup script for raspi
+
+##############################
+# Bash Color
+warning='\033[1;5;31m'
+blue='\e[34m'
+answer='\033[1;92m'
+info='\033[1;32m'
+download='\e[1;5;93m'
+restore='\033[0m'
+reset='\e[0m'
+##############################
+
+##############################
+# Prompt colored
+function warning() {
+    printf "${warning}[ WARNING  ]${reset} \e[1m$*${reset}\n"
+    sleep 1.5
+}
+
+function question() {
+    printf "${blue}[ QUESTION ]${reset} $*${reset}\n"
+}
+
+function answer() {
+    printf "${answer}[${reset}\e[7m$1${reset}${answer}] ${reset}$2${reset}\n"
+}
+
+function info() {
+    printf "${info}[   INFO   ]${reset} $*${reset}\n"
+}
+
+function prompt() {
+    printf "${blue}[ WAITING..]: ${reset}"
+}
+
+function download() {
+    printf "${download}[DOWNLOADNG]${reset} $* ...${reset}\n"
+}
+
+function install() {
+    printf "${download}[APTINSTALL]${reset} $*${reset}\n"
+}
+##############################
+
+##############################
+# some utils function
+function root_check() {
+    if [[ "$EUID" -ne "0" ]];then
+        warning "Scripts must be run as root."
+        exit 1
+    fi
+}
+
+function print(){
+    declare -a to_print=("$@")
+    i="1"
+    clear
+    question
+    for content in "${to_print[@]}"; do
+        answer "$i" "$content"
+        let i++
+    done
+}
+
+function choice() {
+    local nb_choice=$1
+    check="0"
+    prompt
+    read
+    REPLY=${REPLY:0:1}
+    REPLY=`echo $REPLY | tr '[A-Z]' '[a-z]'`
+    if [[ "$REPLY" == q ]]; then
+        warning "Good Bye"
+        exit 1
+    elif [[ "$REPLY" < 1 ]] || [[ "$REPLY" > "$nb_choice" ]]; then
+        warning "Wrong Choice"
+    else
+        check="1"
+        return ${REPLY}
+    fi
+}
+
+function loop() {
+    local loop="true"
+    while $loop; do
+        `echo $1`
+        last_max_printed=$?
+        choice ${last_max_printed}
+        return_code=$?
+        if [[ "$check" == "1" ]]; then
+            return ${return_code}
+        fi
+    done
+}
+
+function ask() {
+    local prompt=$1
+    local default=$2
+    local choice=""
+    local loop="true"
+    while $loop; do
+        if [[ "$default" == "y" ]]; then
+            printf "${blue}[ASK (Y/n) ]${reset} ${prompt} ${reset}"
+            read choice
+        elif [[ "$default" == "n" ]]; then
+            printf "${blue}[ASK (y/N) ]${reset} ${prompt} ${reset}"
+            read choice
+        else
+            printf "${blue}[ASK (y/n) ]${reset} ${prompt} ${reset}"
+            read choice
+        fi
+        choice=${choice:0:1}
+        choice=`echo $choice | tr '[A-Z]' '[a-z]'`
+        if [[ "$choice" != "y" ]] && [[ "$choice" != "n" ]]; then
+            warning "Wrong Choice"
+        elif [[ "$choice" == "y" ]]; then return 1;
+        elif [[ "$choice" == "n" ]]; then return 0;
+        fi
+    done
+}
+##############################
+
+function main_menu() {
+    local main_menu_print=(
+        "Setup an Account"
+        "Install TightVNCServer"
+        "Install kalipi-config"
+        "Configure SSH server port"
+    )
+    print "${main_menu_print[@]}"
+    return ${#main_menu_print[*]}
+}
+
+function main_menu_choose() {
+    choice=$1
+    clear
+    case $choice in
+        1) setup_account;;
+        2) install_tightvnc;;
+        3) install_kalipi_config;;
+        4) config_sshd;;
+    esac
+}
+
+function setup_account() {
+    question "Enter an user name to create : "
+    prompt
+    read username_brut
+    info "Make the first latter lowercase."
+    username_first=$(echo ${username_brut::1} | tr '[A-Z]' '[a-z]')
+	username_clean=$(echo "${username_first}${username_brut:1}")
+    info "Add the user $username_clean"
+    adduser $username_clean
+    info "Add proper groups id for $username_clean"
+    id_user=$(id $SUDO_USER | cut -d"," -f2- | sed 's/,/\n/g' | cut -d"(" -f2- | cut -d")" -f-1)
+    usermod -aG $(echo $(echo ${id_user} | sed 's/ /,/g') $(echo ${username_clean}))
+}
+
+function install_tightvnc() {
+    if [[ ! -f "/usr/bin/tightvncserver" ]]; then
+        warning "tightvncserver not found"
+        install "tightvncserver"
+        apt install tightvncserver
+    fi
+
+    if [[ ! -f "~/.vnc/passwd" ]]; then
+        warning "tightvncserver not configured"
+        tightvncpasswd
+    fi
+    info "Creating tightvncserver.service"
+    tee -a /etc/systemd/system/tightvncserver.service > /dev/null <<EOT
+[Unit]
+Description=TightVNC remote desktop server
+After=sshd.service
+
+[Service]
+Type=dbus
+
+# Default Config
+#ExecStart=/usr/bin/tightvncserver :1
+
+# Custom
+ExecStart=/usr/bin/tightvncserver :1 -localhost -geometry 1920x1080 -depth 24
+
+# Mac screen
+#ExecStart=/usr/bin/tightvncserver :1 -localhost -geometry 1440x900 -depth 24
+User=pix
+Type=forking
+
+[Install]
+WantedBy=multi-user.target
+EOT
+    info "Adding right permissions to tightvncserver.service"
+    chown root:root /etc/systemd/system/tightvncserver.service
+    chmod 755 /etc/systemd/system/tightvncserver.service
+    info "Enabling tightvncserver.service with systemctl"
+    systemctl enable tightvncserver.service
+}
+
+function install_kalipi_config() {
+    download "kalipi-config"
+    wget -O kalipi-config https://raw.githubusercontent.com/Re4son/RPi-Tweaks/master/kalipi-config/kalipi-config
+    info "Giving execute permissions to kalipi-config"
+    chmod +x kalipi-config
+    info "Moving kalipi-config to /usr/bin"
+    mv kalipi-config /usr/bin/
+    info "Installing depedencies"
+    install "lua5.1"
+    apt install lua5.1 -y
+}
+
+function config_sshd_check_installed() {
+    if [[ ! -f /etc/ssh/sshd_config ]]; then
+        sshd_installed=0
+        info "openssh-server isn't installed yet"
+        ask "Do you wan't to install it ?" y
+        return_code_check_installed=$?
+    else
+        sshd_installed=1
+        info "openssh-server is installed"
+        ask "Do you wan't to re-configure it ?"
+        return_code_check_installed=$?
+    fi
+
+    if [[ "$sshd_installed" == "0" ]]; then
+        if [[ "$return_code_check_installed" == "1" ]]; then
+            install "openssh-server"
+            apt install openssh-server
+        elif [[ "$return_code_check_installed" == "0" ]]; then
+            warning "openssh-server isn't installed"
+            exit 255
+        fi
+    elif [[ "$sshd_installed" == "1" ]]; then
+        if [[ "$return_code_check_installed" == "1" ]]; then
+            info "Reconfigure openssh-server"
+            dpkg --reconfigure openssh-server
+        elif [[ "$return_code_check_installed" == "0" ]]; then info "Don't doing anything";
+        fi
+    fi
+
+}
+
+function config_sshd_port_grep() {
+    current_port=$(grep "Port " /etc/ssh/sshd_config | cut -d" " -f2)
+    info "Current port is : ${current_port}"
+}
+
+function config_sshd_port_ask() {
+    local loop=true
+    while $loop; do
+        clear
+        config_sshd_port_grep
+        question "Enter a desired port : "
+        prompt
+        read port_to_change
+        if ! [[ "$port_to_change" =~ ^[0-9]+$ ]]; then warning "Enter a number";
+        elif [[ "$port_to_change" -lt "1" ]] || [[ "$port_to_change" -gt "65535" ]]; then warning "Enter a number in the good range (1-65535)"
+        else loop=false
+        fi
+    done
+    info "Changing port in /etc/ssh/sshd_config"
+    sed -i "/Port / s/${current_port}/${port_to_change}/" /etc/ssh/sshd_config
+    info "Restarting ssh via systemctl"
+    systemctl restart ssh
+}
+
+function config_sshd_port_grep_ask() {
+    config_sshd_port_grep
+    ask "Do you wan't to change it ?" y
+    return_code_port=$?
+
+    if [[ "$return_code_port" == "1" ]]; then
+        config_sshd_port_ask
+    elif [[ "$return_code_port" == "0" ]]; then
+        info "don\'t do anything"
+    fi
+}
+
+function config_sshd() {
+    clear
+    config_sshd_check_installed
+    config_sshd_port_grep_ask
+}
+
+function main() {
+    #print_color
+    root_check
+    loop "main_menu"
+    main_menu_answer=$?
+    main_menu_choose "$main_menu_answer"
+}
+
+main
