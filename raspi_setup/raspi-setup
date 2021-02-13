@@ -235,7 +235,7 @@ function config_sshd_check_installed() {
     elif [[ "$sshd_installed" == "1" ]]; then
         if [[ "$return_code_check_installed" == "1" ]]; then
             info "Reconfigure openssh-server"
-            dpkg --reconfigure openssh-server
+            dpkg-reconfigure openssh-server
         elif [[ "$return_code_check_installed" == "0" ]]; then info "Don't doing anything";
         fi
     fi
